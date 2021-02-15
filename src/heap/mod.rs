@@ -1,3 +1,3 @@
-mod min_heap;
+mod binary_heap;
 
-pub use min_heap::*;
+pub use binary_heap::*;

@@ -1,21 +1,31 @@
-#[derive(Debug)]
-pub struct MinHeap<E: Ord> {
+pub struct BinaryHeap<E: Ord> {
     heap: Vec<E>,
+    cmp: fn(&E, &E) -> bool,
 }
 
-impl <E: Ord> Default for MinHeap<E> {
+impl <E: Ord> Default for BinaryHeap<E> {
     fn default() -> Self {
-        Self::new()
+        Self::min_heap()
     }
 }
 
-impl<E: Ord> MinHeap<E> {
-    pub fn new() -> Self {
-        MinHeap { heap: vec![] }
+impl<E: Ord> BinaryHeap<E> {
+    pub fn min_heap() -> Self {
+        BinaryHeap {
+            heap: vec![],
+            cmp: std::cmp::PartialOrd::lt,
+        }
+    }
+
+    pub fn max_heap() -> Self {
+        BinaryHeap {
+            heap: vec![],
+            cmp: std::cmp::PartialOrd::gt,
+        }
     }
 
     /// Adds an element to the heap.
-    pub fn add(&mut self, e: E) -> &mut MinHeap<E> {
+    pub fn add(&mut self, e: E) -> &mut BinaryHeap<E> {
         /*
             - Add the element to the bottom level of the heap at the leftmost open space.
             - Compare the added element with its parent; if they are in the correct order, stop.
@@ -29,7 +39,7 @@ impl<E: Ord> MinHeap<E> {
     fn up_heap(&mut self, index: usize) {
         let parent_index = self.parent_index(index);
         if let Some(parent_index) = parent_index {
-            if self.heap[parent_index] > self.heap[index] {
+            if (self.cmp)(&self.heap[index], &self.heap[parent_index]) {
                 self.heap.swap(index, parent_index);
                 self.up_heap(parent_index);
             }
@@ -80,20 +90,20 @@ impl<E: Ord> MinHeap<E> {
 
     fn down_heap(&mut self, index: usize) {
         let children = self.children_indexes(index);
-        let mut min = index;
+        let mut target = index;
         if let Some(first) = children.0 {
-            if self.heap[first] < self.heap[index] {
-                min = first;
+            if (self.cmp)(&self.heap[first], &self.heap[index]) {
+                target = first;
             }
         }
         if let Some(second) = children.1 {
-            if self.heap[second] < self.heap[index] {
-                min = second;
+            if (self.cmp)(&self.heap[second], &self.heap[index]) {
+                target = second;
             }
         }
-        if min != index {
-            self.heap.swap(min, index);
-            self.down_heap(min);
+        if target != index {
+            self.heap.swap(target, index);
+            self.down_heap(target);
         }
     }
 }
@@ -105,7 +115,7 @@ mod tests {
     #[test]
     fn it_should_allow_to_push_element_in_heap() {
         // GIVEN
-        let mut heap = MinHeap::new();
+        let mut heap = BinaryHeap::min_heap();
 
         // WHEN
         heap.add(3)
@@ -118,7 +128,7 @@ mod tests {
     #[test]
     fn it_should_get_heap_length() {
         // GIVEN
-        let mut heap = MinHeap::new();
+        let mut heap = BinaryHeap::min_heap();
         heap.add(3)
             .add(-1);
 
@@ -132,7 +142,7 @@ mod tests {
     #[test]
     fn it_should_check_emptiness_for_empty_heap() {
         // GIVEN
-        let heap: MinHeap<i32> = MinHeap::new();
+        let heap: BinaryHeap<i32> = BinaryHeap::min_heap();
 
         // WHEN
         let empty = heap.is_empty();
@@ -144,7 +154,7 @@ mod tests {
     #[test]
     fn it_should_check_emptiness_for_non_empty_heap() {
         // GIVEN
-        let mut heap = MinHeap::new();
+        let mut heap = BinaryHeap::min_heap();
         heap.add(3)
             .add(-1);
 
@@ -159,7 +169,7 @@ mod tests {
     #[should_panic]
     fn it_should_panic_if_pop_empty_heap() {
         // GIVEN
-        let mut heap: MinHeap<i32> = MinHeap::new();
+        let mut heap: BinaryHeap<i32> = BinaryHeap::min_heap();
 
         // WHEN ... should panic 😱
         heap.pop();
@@ -168,7 +178,7 @@ mod tests {
     #[test]
     fn it_should_pop_min_value() {
         // GIVEN
-        let mut heap = MinHeap::new();
+        let mut heap = BinaryHeap::min_heap();
         heap.add(3)
             .add(-1)
             .add(5)
@@ -184,7 +194,7 @@ mod tests {
     #[test]
     fn it_should_pop_min_value_and_re_balance_heap() {
         // GIVEN
-        let mut heap = MinHeap::new();
+        let mut heap = BinaryHeap::min_heap();
         heap.add(3)
             .add(-1)
             .add(5)
@@ -196,5 +206,43 @@ mod tests {
 
         // THEN
         assert_eq!(min, 0);
+    }
+
+    #[test]
+    fn it_should_exhaust_min_heap() {
+        // GIVEN
+        let mut heap = BinaryHeap::min_heap();
+        heap.add(3)
+            .add(-1)
+            .add(5)
+            .add(0);
+
+        // WHEN
+        let mut exhausted = vec![];
+        while !heap.is_empty() {
+            exhausted.push(heap.pop());
+        }
+
+        // THEN
+        assert_eq!(exhausted, vec![-1, 0, 3, 5]);
+    }
+
+    #[test]
+    fn it_should_exhaust_max_heap() {
+        // GIVEN
+        let mut heap = BinaryHeap::max_heap();
+        heap.add(3)
+            .add(-1)
+            .add(5)
+            .add(0);
+
+        // WHEN
+        let mut exhausted = vec![];
+        while !heap.is_empty() {
+            exhausted.push(heap.pop());
+        }
+
+        // THEN
+        assert_eq!(exhausted, vec![5, 3, 0, -1]);
     }
 }
