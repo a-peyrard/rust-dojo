@@ -1,41 +1,17 @@
+use crate::heap::heap_trait::Heap;
+
 pub struct BinaryHeap<E: Ord> {
     heap: Vec<E>,
     cmp: fn(&E, &E) -> bool,
 }
 
-impl <E: Ord> Default for BinaryHeap<E> {
+impl<E: Ord> Default for BinaryHeap<E> {
     fn default() -> Self {
         Self::min_heap()
     }
 }
 
 impl<E: Ord> BinaryHeap<E> {
-    pub fn min_heap() -> Self {
-        BinaryHeap {
-            heap: vec![],
-            cmp: std::cmp::PartialOrd::lt,
-        }
-    }
-
-    pub fn max_heap() -> Self {
-        BinaryHeap {
-            heap: vec![],
-            cmp: std::cmp::PartialOrd::gt,
-        }
-    }
-
-    /// Adds an element to the heap.
-    pub fn add(&mut self, e: E) -> &mut BinaryHeap<E> {
-        /*
-            - Add the element to the bottom level of the heap at the leftmost open space.
-            - Compare the added element with its parent; if they are in the correct order, stop.
-            - If not, swap the element with its parent and return to the previous step.
-         */
-        self.heap.push(e);
-        self.up_heap(self.heap.len() - 1);
-        self
-    }
-
     fn up_heap(&mut self, index: usize) {
         let parent_index = self.parent_index(index);
         if let Some(parent_index) = parent_index {
@@ -43,6 +19,25 @@ impl<E: Ord> BinaryHeap<E> {
                 self.heap.swap(index, parent_index);
                 self.up_heap(parent_index);
             }
+        }
+    }
+
+    fn down_heap(&mut self, index: usize) {
+        let children = self.children_indexes(index);
+        let mut target = index;
+        if let Some(first) = children.0 {
+            if (self.cmp)(&self.heap[first], &self.heap[index]) {
+                target = first;
+            }
+        }
+        if let Some(second) = children.1 {
+            if (self.cmp)(&self.heap[second], &self.heap[index]) {
+                target = second;
+            }
+        }
+        if target != index {
+            self.heap.swap(target, index);
+            self.down_heap(target);
         }
     }
 
@@ -67,16 +62,36 @@ impl<E: Ord> BinaryHeap<E> {
             Some(index)
         }
     }
+}
 
-    pub fn len(&self) -> usize {
-        self.heap.len()
+impl<E: Ord> Heap<E> for BinaryHeap<E> {
+    fn min_heap() -> Self {
+        BinaryHeap {
+            heap: vec![],
+            cmp: std::cmp::PartialOrd::lt,
+        }
     }
 
-    pub fn is_empty(&self) -> bool {
-        self.len() == 0
+    fn max_heap() -> Self {
+        BinaryHeap {
+            heap: vec![],
+            cmp: std::cmp::PartialOrd::gt,
+        }
     }
 
-    pub fn pop(&mut self) -> E {
+    /// Adds an element to the heap.
+    fn add(&mut self, e: E) -> &mut BinaryHeap<E> {
+        /*
+            - Add the element to the bottom level of the heap at the leftmost open space.
+            - Compare the added element with its parent; if they are in the correct order, stop.
+            - If not, swap the element with its parent and return to the previous step.
+         */
+        self.heap.push(e);
+        self.up_heap(self.heap.len() - 1);
+        self
+    }
+
+    fn pop(&mut self) -> E {
         /*
             Replace the root of the heap with the last element on the last level.
             Compare the new root with its children; if they are in the correct order, stop.
@@ -88,23 +103,8 @@ impl<E: Ord> BinaryHeap<E> {
         head
     }
 
-    fn down_heap(&mut self, index: usize) {
-        let children = self.children_indexes(index);
-        let mut target = index;
-        if let Some(first) = children.0 {
-            if (self.cmp)(&self.heap[first], &self.heap[index]) {
-                target = first;
-            }
-        }
-        if let Some(second) = children.1 {
-            if (self.cmp)(&self.heap[second], &self.heap[index]) {
-                target = second;
-            }
-        }
-        if target != index {
-            self.heap.swap(target, index);
-            self.down_heap(target);
-        }
+    fn len(&self) -> usize {
+        self.heap.len()
     }
 }
 
