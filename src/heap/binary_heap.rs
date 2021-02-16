@@ -1,17 +1,17 @@
 use crate::heap::heap_trait::Heap;
 
-pub struct BinaryHeap<E: Ord> {
+pub struct BinaryHeap<E: Ord + Clone> {
     data: Vec<E>,
     cmp: fn(&E, &E) -> bool,
 }
 
-impl<E: Ord> Default for BinaryHeap<E> {
+impl<E: Ord + Clone> Default for BinaryHeap<E> {
     fn default() -> Self {
         Self::min_heap()
     }
 }
 
-impl<E: Ord> BinaryHeap<E> {
+impl<E: Ord + Clone> BinaryHeap<E> {
     pub fn min_heap() -> Self {
         BinaryHeap {
             data: vec![],
@@ -78,7 +78,7 @@ impl<E: Ord> BinaryHeap<E> {
     }
 }
 
-impl<E: Ord> Heap<E> for BinaryHeap<E> {
+impl<E: Ord + Clone> Heap<E> for BinaryHeap<E> {
     /// Adds an element to the heap.
     fn push(&mut self, e: E) {
         /*
@@ -131,6 +131,35 @@ impl<E: Ord> Heap<E> for BinaryHeap<E> {
 
     fn len(&self) -> usize {
         self.data.len()
+    }
+}
+
+impl<E: 'static + Ord + Clone> IntoIterator for &BinaryHeap<E> {
+    type Item = E;
+    type IntoIter = BinaryHeapIntoIterator<E>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        BinaryHeapIntoIterator {
+            heap: BinaryHeap {
+                data: self.data.to_vec(),
+                cmp: self.cmp,
+            },
+        }
+    }
+}
+
+pub struct BinaryHeapIntoIterator<E: 'static + Ord + Clone> {
+    heap: BinaryHeap<E>,
+}
+
+impl<E: Ord + Clone> Iterator for BinaryHeapIntoIterator<E> {
+    type Item = E;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.heap.len() {
+            0 => None,
+            _ => Some(self.heap.pop())
+        }
     }
 }
 
@@ -357,5 +386,26 @@ mod tests {
         // THEN
         assert_eq!(value, -1);
         assert_eq!(*new_head, 0);
+    }
+
+    #[test]
+    fn it_should_iterate_over_values() {
+        // GIVEN
+        let mut heap: BinaryHeap<i32> = BinaryHeap::min_heap();
+        heap.push(3);
+        heap.push(-1);
+        heap.push(5);
+        heap.push(0);
+
+        // WHEN
+        let mut iterated = vec![];
+        for e in &heap {
+            iterated.push(e);
+        }
+        let len_of_original_heap = heap.len();
+
+        // THEN
+        assert_eq!(iterated, vec![-1, 0, 3, 5]);
+        assert_eq!(len_of_original_heap, 4);
     }
 }

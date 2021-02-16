@@ -1,11 +1,11 @@
 use crate::heap::{Heap, BinaryHeap};
 
-pub struct KHeap<E: 'static + Ord> {
+pub struct KHeap<E: 'static + Ord + Clone> {
     heap: Box<dyn Heap<E>>, // &'a mut dyn Heap<E>,
     size: usize,
 }
 
-impl<E: Ord> KHeap<E> {
+impl<E: Ord + Clone> KHeap<E> {
     /// Creates a new KHeap which will retain the k minimum elements.
     pub fn min_with_size(s: usize) -> Self {
         KHeap {
@@ -23,7 +23,7 @@ impl<E: Ord> KHeap<E> {
     }
 }
 
-impl<E: Ord> Heap<E> for KHeap<E> {
+impl<E: Ord + Clone> Heap<E> for KHeap<E> {
     fn push(&mut self, e: E) {
         if self.size > self.heap.len() {
             self.heap.push(e);
