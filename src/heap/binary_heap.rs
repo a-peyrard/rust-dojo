@@ -12,14 +12,14 @@ impl<E: Ord> Default for BinaryHeap<E> {
 }
 
 impl<E: Ord> BinaryHeap<E> {
-    fn min_heap() -> Self {
+    pub fn min_heap() -> Self {
         BinaryHeap {
             data: vec![],
             cmp: std::cmp::PartialOrd::lt,
         }
     }
 
-    fn max_heap() -> Self {
+    pub fn max_heap() -> Self {
         BinaryHeap {
             data: vec![],
             cmp: std::cmp::PartialOrd::gt,
@@ -80,7 +80,7 @@ impl<E: Ord> BinaryHeap<E> {
 
 impl<E: Ord> Heap<E> for BinaryHeap<E> {
     /// Adds an element to the heap.
-    fn add(&mut self, e: E) {
+    fn push(&mut self, e: E) {
         /*
             - Add the element to the bottom level of the heap at the leftmost open space.
             - Compare the added element with its parent; if they are in the correct order, stop.
@@ -102,6 +102,33 @@ impl<E: Ord> Heap<E> for BinaryHeap<E> {
         head
     }
 
+    fn push_pop(&mut self, e: E) -> E {
+        /*
+            Compare whether the item we're pushing or the peeked top of the heap is greater
+            (assuming a max heap)
+            If the root of the heap is greater:
+                Replace the root with the new item
+                Down-heapify starting from the root
+            Else, return the item we're pushing
+         */
+        let better = self.compare_to_top(&e);
+        if better {
+            e
+        } else {
+            let res = std::mem::replace(&mut self.data[0], e);
+            self.down_heap(0);
+            res
+        }
+    }
+
+    fn peek(&self) -> &E {
+        &self.data[0]
+    }
+
+    fn compare_to_top(&self, elem: &E) -> bool {
+        (self.cmp)(elem, self.peek())
+    }
+
     fn len(&self) -> usize {
         self.data.len()
     }
@@ -117,19 +144,18 @@ mod tests {
         let mut heap = BinaryHeap::min_heap();
 
         // WHEN
-        heap.add(3);
-        heap.add(-1);
+        heap.push(3);
+        heap.push(-1);
 
         // THEN (noop assertion, we just want to ensure compilation and no panic)
-        assert!(true);
     }
 
     #[test]
     fn it_should_get_heap_length() {
         // GIVEN
         let mut heap = BinaryHeap::min_heap();
-        heap.add(3);
-        heap.add(-1);
+        heap.push(3);
+        heap.push(-1);
 
         // WHEN
         let length = heap.len();
@@ -154,8 +180,8 @@ mod tests {
     fn it_should_check_emptiness_for_non_empty_heap() {
         // GIVEN
         let mut heap = BinaryHeap::min_heap();
-        heap.add(3);
-        heap.add(-1);
+        heap.push(3);
+        heap.push(-1);
 
         // WHEN
         let empty = heap.is_empty();
@@ -178,10 +204,10 @@ mod tests {
     fn it_should_pop_min_value() {
         // GIVEN
         let mut heap = BinaryHeap::min_heap();
-        heap.add(3);
-        heap.add(-1);
-        heap.add(5);
-        heap.add(0);
+        heap.push(3);
+        heap.push(-1);
+        heap.push(5);
+        heap.push(0);
 
         // WHEN
         let min = heap.pop();
@@ -194,10 +220,10 @@ mod tests {
     fn it_should_pop_min_value_and_re_balance_heap() {
         // GIVEN
         let mut heap = BinaryHeap::min_heap();
-        heap.add(3);
-        heap.add(-1);
-        heap.add(5);
-        heap.add(0);
+        heap.push(3);
+        heap.push(-1);
+        heap.push(5);
+        heap.push(0);
         heap.pop();
 
         // WHEN
@@ -211,10 +237,10 @@ mod tests {
     fn it_should_exhaust_min_heap() {
         // GIVEN
         let mut heap = BinaryHeap::min_heap();
-        heap.add(3);
-        heap.add(-1);
-        heap.add(5);
-        heap.add(0);
+        heap.push(3);
+        heap.push(-1);
+        heap.push(5);
+        heap.push(0);
 
         // WHEN
         let mut exhausted = vec![];
@@ -230,10 +256,10 @@ mod tests {
     fn it_should_exhaust_max_heap() {
         // GIVEN
         let mut heap = BinaryHeap::max_heap();
-        heap.add(3);
-        heap.add(-1);
-        heap.add(5);
-        heap.add(0);
+        heap.push(3);
+        heap.push(-1);
+        heap.push(5);
+        heap.push(0);
 
         // WHEN
         let mut exhausted = vec![];
@@ -243,5 +269,93 @@ mod tests {
 
         // THEN
         assert_eq!(exhausted, vec![5, 3, 0, -1]);
+    }
+
+    #[test]
+    fn it_should_peek_min_value() {
+        // GIVEN
+        let mut heap = BinaryHeap::min_heap();
+        heap.push(3);
+        heap.push(-1);
+        heap.push(5);
+        heap.push(0);
+
+        // WHEN
+        let min = heap.peek();
+        let length = heap.len();
+
+        // THEN
+        assert_eq!(*min, -1);
+        assert_eq!(length, 4);
+    }
+
+    #[test]
+    fn it_should_compare_with_top_for_min_heap() {
+        // GIVEN
+        let mut heap = BinaryHeap::min_heap();
+        heap.push(3);
+        heap.push(-1);
+        heap.push(5);
+        heap.push(0);
+
+        // WHEN
+        let better = heap.compare_to_top(&-3);
+        let not_better = heap.compare_to_top(&0);
+
+        // THEN
+        assert_eq!(better, true);
+        assert_eq!(not_better, false);
+    }
+
+    #[test]
+    fn it_should_compare_with_top_for_max_heap() {
+        // GIVEN
+        let mut heap = BinaryHeap::max_heap();
+        heap.push(3);
+        heap.push(-1);
+        heap.push(5);
+        heap.push(0);
+
+        // WHEN
+        let better = heap.compare_to_top(&6);
+        let not_better = heap.compare_to_top(&4);
+
+        // THEN
+        assert_eq!(better, true);
+        assert_eq!(not_better, false);
+    }
+
+    #[test]
+    fn it_should_push_pop_for_min_heap_when_elem_is_smaller() {
+        // GIVEN
+        let mut heap = BinaryHeap::min_heap();
+        heap.push(3);
+        heap.push(-1);
+        heap.push(5);
+        heap.push(0);
+
+        // WHEN
+        let value = heap.push_pop(-3);
+
+        // THEN
+        assert_eq!(value, -3);
+    }
+
+    #[test]
+    fn it_should_push_pop_for_min_heap_when_elem_is_bigger() {
+        // GIVEN
+        let mut heap = BinaryHeap::min_heap();
+        heap.push(3);
+        heap.push(-1);
+        heap.push(5);
+        heap.push(0);
+
+        // WHEN
+        let value = heap.push_pop(1);
+        let new_head = heap.peek();
+
+        // THEN
+        assert_eq!(value, -1);
+        assert_eq!(*new_head, 0);
     }
 }
