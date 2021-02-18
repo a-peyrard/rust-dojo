@@ -40,12 +40,12 @@ impl<E: Ord + Clone> BinaryHeap<E> {
         let children = self.children_indexes(index);
         let mut target = index;
         if let Some(first) = children.0 {
-            if (self.cmp)(&self.data[first], &self.data[index]) {
+            if (self.cmp)(&self.data[first], &self.data[target]) {
                 target = first;
             }
         }
         if let Some(second) = children.1 {
-            if (self.cmp)(&self.data[second], &self.data[index]) {
+            if (self.cmp)(&self.data[second], &self.data[target]) {
                 target = second;
             }
         }
@@ -386,6 +386,22 @@ mod tests {
         // THEN
         assert_eq!(value, -1);
         assert_eq!(*new_head, 0);
+    }
+
+    #[test]
+    fn it_should_push_pop_and_promote_minimum_children() {
+        // GIVEN
+        let mut heap = BinaryHeap::min_heap();
+        heap.push(0);
+        heap.push(4);
+        heap.push(18);
+
+        // WHEN
+        heap.push_pop(22);
+        let head = heap.peek();
+
+        // THEN
+        assert_eq!(*head, 4);
     }
 
     #[test]
