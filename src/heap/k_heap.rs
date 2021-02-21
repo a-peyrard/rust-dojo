@@ -1,4 +1,4 @@
-use crate::heap::{Heap, BinaryHeap};
+use crate::heap::{BinaryHeap, Heap};
 
 pub struct KHeap<'a, E: 'a + Ord + Clone> {
     heap: Box<dyn Heap<E> + 'a>,
