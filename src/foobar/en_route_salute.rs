@@ -1,9 +1,9 @@
 /*
-    En Route Salute
+   En Route Salute
 
-    Foobar problem weirdly solved a year ago, here:
-    https://github.com/a-peyrard/foobar/blob/master/src/main/java/org/teutinc/foobar/second/part1/Solution.java
- */
+   Foobar problem weirdly solved a year ago, here:
+   https://github.com/a-peyrard/foobar/blob/master/src/main/java/org/teutinc/foobar/second/part1/Solution.java
+*/
 
 pub fn count_salute(world: &str) -> i32 {
     let mut right_walkers = 0;

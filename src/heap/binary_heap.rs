@@ -58,7 +58,7 @@ impl<E: Ord + Clone> BinaryHeap<E> {
     fn parent_index(&self, index: usize) -> Option<usize> {
         match index {
             0 => None,
-            _ => Some((index - 1) / 2)
+            _ => Some((index - 1) / 2),
         }
     }
 
@@ -82,21 +82,21 @@ impl<E: Ord + Clone> Heap<E> for BinaryHeap<E> {
     /// Adds an element to the heap.
     fn push(&mut self, e: E) {
         /*
-            - Add the element to the bottom level of the heap at the leftmost open space.
-            - Compare the added element with its parent; if they are in the correct order, stop.
-            - If not, swap the element with its parent and return to the previous step.
-         */
+           - Add the element to the bottom level of the heap at the leftmost open space.
+           - Compare the added element with its parent; if they are in the correct order, stop.
+           - If not, swap the element with its parent and return to the previous step.
+        */
         self.data.push(e);
         self.up_heap(self.data.len() - 1);
     }
 
     fn pop(&mut self) -> E {
         /*
-            Replace the root of the heap with the last element on the last level.
-            Compare the new root with its children; if they are in the correct order, stop.
-            If not, swap the element with one of its children and return to the previous step.
-            (Swap with its smaller child in a min-heap and its larger child in a max-heap.)
-         */
+           Replace the root of the heap with the last element on the last level.
+           Compare the new root with its children; if they are in the correct order, stop.
+           If not, swap the element with one of its children and return to the previous step.
+           (Swap with its smaller child in a min-heap and its larger child in a max-heap.)
+        */
         let head = self.data.swap_remove(0);
         self.down_heap(0);
         head
@@ -104,13 +104,13 @@ impl<E: Ord + Clone> Heap<E> for BinaryHeap<E> {
 
     fn push_pop(&mut self, e: E) -> E {
         /*
-            Compare whether the item we're pushing or the peeked top of the heap is greater
-            (assuming a max heap)
-            If the root of the heap is greater:
-                Replace the root with the new item
-                Down-heapify starting from the root
-            Else, return the item we're pushing
-         */
+           Compare whether the item we're pushing or the peeked top of the heap is greater
+           (assuming a max heap)
+           If the root of the heap is greater:
+               Replace the root with the new item
+               Down-heapify starting from the root
+           Else, return the item we're pushing
+        */
         let better = self.compare_to_top(&e);
         if better {
             e
@@ -158,7 +158,7 @@ impl<E: Ord + Clone> Iterator for BinaryHeapIntoIterator<E> {
     fn next(&mut self) -> Option<Self::Item> {
         match self.heap.len() {
             0 => None,
-            _ => Some(self.heap.pop())
+            _ => Some(self.heap.pop()),
         }
     }
 }

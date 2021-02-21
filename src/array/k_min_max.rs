@@ -1,26 +1,18 @@
-use crate::heap::{KHeap, Heap};
+use crate::heap::{Heap, KHeap};
 
 pub fn find_k_minimum<T: Ord + Clone>(arr: &[T], k: usize) -> Option<&T> {
-    find_k_min_max(
-        arr,
-        k,
-        KHeap::min_with_size,
-    )
+    find_k_min_max(arr, k, KHeap::min_with_size)
 }
 
 pub fn find_k_maximum<T: Ord + Clone>(arr: &[T], k: usize) -> Option<&T> {
-    find_k_min_max(
-        arr,
-        k,
-        KHeap::max_with_size,
-    )
+    find_k_min_max(arr, k, KHeap::max_with_size)
 }
 
 fn find_k_min_max<'a, T: 'a + Ord + Clone>(
     arr: &'a [T],
     k: usize,
-    k_heap_initializer: fn(usize) -> KHeap<'a, &'a T>) -> Option<&'a T> {
-
+    k_heap_initializer: fn(usize) -> KHeap<'a, &'a T>,
+) -> Option<&'a T> {
     if arr.len() < k {
         return None;
     }
@@ -31,7 +23,6 @@ fn find_k_min_max<'a, T: 'a + Ord + Clone>(
     }
     Some(kheap.peek())
 }
-
 
 #[cfg(test)]
 mod tests {
