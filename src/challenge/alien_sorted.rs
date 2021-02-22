@@ -26,20 +26,20 @@ fn is_before(first: &str, second: &str, char_indexes: &collections::HashMap<char
     loop {
         let first_char = first_chars.next();
         let second_char = second_chars.next();
-        if first_char.is_none() {
-            return true;
-        } else if second_char.is_none() {
-            return false;
-        } else {
-            // I don't know how to write that, as it involves two options
-            #[allow(clippy::unnecessary_wraps)]
-            let first_index = char_indexes.get(&first_char.unwrap()).unwrap_or(&0);
-            let second_index = char_indexes.get(&second_char.unwrap()).unwrap_or(&0);
-            match first_index.cmp(&second_index) {
-                cmp::Ordering::Less => return true,
-                cmp::Ordering::Greater => return false,
-                cmp::Ordering::Equal => (),
+        if let Some(first_char) = first_char {
+            if let Some(second_char) = second_char {
+                let first_index = char_indexes.get(&first_char).unwrap_or(&0);
+                let second_index = char_indexes.get(&second_char).unwrap_or(&0);
+                match first_index.cmp(&second_index) {
+                    cmp::Ordering::Less => return true,
+                    cmp::Ordering::Greater => return false,
+                    cmp::Ordering::Equal => (),
+                }
+            } else {
+                return false;
             }
+        } else {
+            return true;
         }
     }
 }
