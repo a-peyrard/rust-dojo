@@ -12,13 +12,14 @@ impl Master {
 }
 
 pub fn find_secret_word(words: Vec<String>, master: &Master) {
-    let mut candidates: collections::HashSet<&String> = words.iter().collect();
+    let mut candidates: collections::HashSet<String> = words.into_iter().collect();
     let mut found = false;
     for _ in 0..10 {
         println!("we still have {} candidates", candidates.len());
         // pop an element from the set (should find a way to use pop bellow)
-        let candidate = candidates.iter().next().cloned().unwrap();
-        candidates.remove(candidate);
+        // let candidate = candidates.iter().next().cloned().unwrap();
+        // candidates.remove(candidate);
+        let candidate = pop(&mut candidates);
 
         // let candidate = pop(&mut candidates);
         let dis = master.guess(candidate.clone());
@@ -28,7 +29,7 @@ pub fn find_secret_word(words: Vec<String>, master: &Master) {
             found = true;
             break;
         }
-        candidates.retain(|c| distance(c, candidate) == dis);
+        candidates.retain(|c| distance(c, &candidate) == dis);
     }
     if !found {
         panic!("Unable to find the secret 😱");
@@ -37,11 +38,10 @@ pub fn find_secret_word(words: Vec<String>, master: &Master) {
 
 // this method was an attempt to create a function popping a value,
 // but the compiler zis complaining about multiple mutable borrowing :(
-// fn pop<'a>(set: &'a mut collections::HashSet<&String>) -> &'a String {
-//     let elem = set.iter().next().cloned().unwrap();
-//     set.remove(elem);
-//     elem
-// }
+fn pop(set: &mut collections::HashSet<String>) -> String {
+    let elem = set.iter().next().cloned().unwrap();
+    set.take(&elem).unwrap()
+}
 
 fn distance(word1: &str, word2: &str) -> i32 {
     word1
