@@ -1,8 +1,6 @@
 pre-commit:
   parallel: true
   commands:
-    install:
-      run: rustup component add rustfmt clippy
     build:
       run: cargo build
     test:
