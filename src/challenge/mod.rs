@@ -1,4 +1,6 @@
 pub use alien_sorted::*;
+pub use characters_frequency::*;
+pub use first_unique_character::*;
 pub use guess_the_word::*;
 pub use logger_rate_limiter::*;
 pub use max_profit::*;
@@ -10,6 +12,8 @@ pub use two_sum::*;
 pub use valid_palindrome::*;
 
 mod alien_sorted;
+mod characters_frequency;
+mod first_unique_character;
 mod guess_the_word;
 mod logger_rate_limiter;
 mod max_profit;
