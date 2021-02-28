@@ -1,28 +1,39 @@
+use std::collections;
+
 pub fn frequency_sort(s: String) -> String {
-    let mut occurrences = [0; 255];
-    for character in s.chars() {
-        occurrences[get_char_index(character)] += 1;
+    if s.is_empty() {
+        return s;
     }
 
-    let mut chars_vec = s.chars().collect::<Vec<char>>();
-    chars_vec.sort_by(|a, b| {
-        let a_i = get_char_index(*a);
-        let b_i = get_char_index(*b);
-        let a_o = occurrences[a_i];
-        let b_o = occurrences[b_i];
-
-        if a_o == b_o {
-            b_i.cmp(&a_i)
-        } else {
-            b_o.cmp(&a_o)
+    let mut occurrences = collections::HashMap::<char, usize>::new();
+    let mut max = 0;
+    for character in s.chars() {
+        let counter = occurrences.entry(character).or_insert(0);
+        *counter += 1;
+        if max < *counter {
+            max = *counter;
         }
-    });
+    }
 
-    chars_vec.into_iter().collect::<String>()
-}
+    // create buckets
+    let mut buckets: Vec<Vec<char>> = vec![vec![]; max];
+    for (character, occurrence) in occurrences {
+        buckets[occurrence - 1].push(character);
+    }
 
-fn get_char_index(character: char) -> usize {
-    character as usize
+    // re-insert the characters
+    let mut res = String::new();
+    let len = buckets.len();
+    for (index, bucket) in buckets.iter().rev().enumerate() {
+        let occurrence = len - index;
+        for character in bucket {
+            for _ in 0..occurrence {
+                res.push(*character);
+            }
+        }
+    }
+
+    res
 }
 
 #[cfg(test)]
@@ -63,18 +74,6 @@ mod tests {
 
         // THEN
         assert!(["bbAa", "bbaA"].contains(&&res[..]));
-    }
-
-    #[test]
-    fn it_should_validate_example4() {
-        // GIVEN
-        let s = "loveleetcode".to_string();
-
-        // WHEN
-        let res = frequency_sort(s);
-
-        // THEN
-        assert!(["eeeeoollvtdc"].contains(&&res[..]));
     }
 
     #[test]
