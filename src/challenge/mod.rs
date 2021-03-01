@@ -1,5 +1,6 @@
 pub use alien_sorted::*;
 pub use guess_the_word::*;
+pub use intersection_arrays::*;
 pub use logger_rate_limiter::*;
 pub use max_profit::*;
 pub use non_constructible_change::*;
@@ -11,6 +12,7 @@ pub use valid_palindrome::*;
 
 mod alien_sorted;
 mod guess_the_word;
+mod intersection_arrays;
 mod logger_rate_limiter;
 mod max_profit;
 mod non_constructible_change;
