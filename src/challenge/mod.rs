@@ -1,3 +1,4 @@
+pub use add_two_integers::*;
 pub use alien_sorted::*;
 pub use characters_frequency::*;
 pub use first_unique_character::*;
@@ -13,6 +14,7 @@ pub use string_convert::*;
 pub use two_sum::*;
 pub use valid_palindrome::*;
 
+mod add_two_integers;
 mod alien_sorted;
 mod characters_frequency;
 mod first_unique_character;
