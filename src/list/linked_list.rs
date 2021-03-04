@@ -71,6 +71,20 @@ impl<T> LinkedList<T> {
     pub fn peek_mut(&mut self) -> Option<&mut T> {
         self.head.as_mut().map(|node| &mut node.element)
     }
+
+    pub fn reverse(&mut self) {
+        let mut prev = None;
+        let mut current_node = self.head.take();
+
+        while let Some(mut current_node_inner) = current_node.take() {
+            let next = current_node_inner.next.take();
+            current_node_inner.next = prev.take();
+            prev = Some(current_node_inner);
+            current_node = next;
+        }
+
+        self.head = prev.take();
+    }
 }
 
 pub struct LinkedListIntoIter<T>(LinkedList<T>);
@@ -309,5 +323,21 @@ mod test {
         // THEN
         let vec = list.into_iter().collect::<Vec<i32>>();
         assert_eq!(vec, vec![3, 42, 2, 1]);
+    }
+
+    #[test]
+    fn it_should_reverse_the_linked_list_in_place() {
+        // GIVEN
+        let mut list = LinkedList::new();
+        list.push(1);
+        list.push(2);
+        list.push(3);
+
+        // WHEN
+        list.reverse();
+
+        // THEN
+        let vec = list.into_iter().collect::<Vec<i32>>();
+        assert_eq!(vec, vec![1, 2, 3]);
     }
 }
