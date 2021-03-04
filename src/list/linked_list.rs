@@ -8,7 +8,7 @@ pub struct LinkedList<T> {
     head: Option<Box<Node<T>>>,
 }
 
-struct Node<T> {
+pub struct Node<T> {
     element: T,
     next: Option<Box<Node<T>>>,
 }
@@ -16,6 +16,18 @@ struct Node<T> {
 impl<T> Node<T> {
     pub fn new(element: T, next: Option<Box<Node<T>>>) -> Self {
         Node { element, next }
+    }
+
+    pub fn element(&self) -> &T {
+        &self.element
+    }
+
+    pub fn next(&self) -> Option<&Node<T>> {
+        self.next.as_deref()
+    }
+
+    pub fn next_mut(&mut self) -> Option<&mut Node<T>> {
+        self.next.as_deref_mut()
     }
 }
 
@@ -45,6 +57,15 @@ impl<T> LinkedList<T> {
 
     pub fn peek(&self) -> Option<&T> {
         self.head.as_ref().map(|node| &node.element)
+    }
+
+    #[allow(clippy::clippy::borrowed_box)]
+    pub fn peek_node(&self) -> Option<&Node<T>> {
+        self.head.as_deref()
+    }
+
+    pub fn peek_node_mut(&mut self) -> Option<&mut Node<T>> {
+        self.head.as_deref_mut()
     }
 
     pub fn peek_mut(&mut self) -> Option<&mut T> {
@@ -91,6 +112,29 @@ impl<'a, T> Iterator for Iter<'a, T> {
             self.next = node.next.as_deref();
             &node.element
         })
+    }
+}
+
+pub struct IterMut<'a, T> {
+    next: Option<&'a mut Node<T>>,
+}
+
+impl<'a, T> Iterator for IterMut<'a, T> {
+    type Item = &'a mut T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.next.take().map(|node| {
+            self.next = node.next.as_deref_mut();
+            &mut node.element
+        })
+    }
+}
+
+impl<T> LinkedList<T> {
+    pub fn iter_mut(&mut self) -> IterMut<'_, T> {
+        IterMut {
+            next: self.head.as_deref_mut(),
+        }
     }
 }
 
@@ -205,5 +249,65 @@ mod test {
         assert_eq!(iter.next(), Some(&2));
         assert_eq!(iter.next(), Some(&1));
         assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn it_should_manually_iter_with_peek_node() {
+        // GIVEN
+        let mut list = LinkedList::new();
+        list.push(1);
+        list.push(2);
+        list.push(3);
+
+        // WHEN
+        let mut v = Vec::<i32>::new();
+        let mut node = list.peek_node();
+        while let Some(inner) = node {
+            v.push(inner.element);
+            node = inner.next();
+        }
+
+        // THEN
+        assert_eq!(v, vec![3, 2, 1]);
+    }
+
+    #[test]
+    fn it_should_manually_iter_and_allow_elements_mutations_with_peek_node_mut() {
+        // GIVEN
+        let mut list = LinkedList::new();
+        list.push(1);
+        list.push(2);
+        list.push(3);
+
+        // WHEN
+        let mut node = list.peek_node_mut();
+        while let Some(inner) = node {
+            inner.element += 1;
+            node = inner.next_mut();
+        }
+
+        // THEN
+        let vec = list.into_iter().collect::<Vec<i32>>();
+        assert_eq!(vec, vec![4, 3, 2]);
+    }
+
+    #[test]
+    fn it_should_manually_iter_and_allow_next_mutations_with_peek_node_mut() {
+        // GIVEN
+        let mut list = LinkedList::new();
+        list.push(1);
+        list.push(2);
+        list.push(3);
+
+        // WHEN
+        let mut node = list.peek_node_mut();
+        if let Some(node) = node.take() {
+            let new_node = Box::new(Node::new(42, node.next.take()));
+            node.next = Some(new_node);
+        }
+
+        // THEN
+        let vec = list.into_iter().collect::<Vec<i32>>();
+        assert_eq!(vec, vec![3, 42, 2, 1]);
     }
 }
