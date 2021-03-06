@@ -1,5 +1,6 @@
 pub use add_two_integers::*;
 pub use alien_sorted::*;
+pub use binary_tree_to_linked_list::*;
 pub use characters_frequency::*;
 pub use first_unique_character::*;
 pub use guess_the_word::*;
@@ -17,6 +18,7 @@ pub use valid_palindrome::*;
 
 mod add_two_integers;
 mod alien_sorted;
+mod binary_tree_to_linked_list;
 mod characters_frequency;
 mod first_unique_character;
 mod guess_the_word;
