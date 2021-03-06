@@ -14,12 +14,44 @@ impl<T> BinaryTreeNode<T> {
         }
     }
 
+    pub fn new_lefty(value: T, left: BinaryTreeNode<T>) -> BinaryTreeNode<T> {
+        BinaryTreeNode {
+            value,
+            left: Some(Box::new(left)),
+            right: None,
+        }
+    }
+
+    pub fn new_righty(value: T, right: BinaryTreeNode<T>) -> BinaryTreeNode<T> {
+        BinaryTreeNode {
+            value,
+            left: None,
+            right: Some(Box::new(right)),
+        }
+    }
+
     pub fn new_leaf(value: T) -> BinaryTreeNode<T> {
         BinaryTreeNode {
             value,
             left: None,
             right: None,
         }
+    }
+
+    pub fn value(&self) -> &T {
+        &self.value
+    }
+
+    pub fn left(&self) -> Option<&BinaryTreeNode<T>> {
+        self.left.as_deref()
+    }
+
+    pub fn right(&self) -> Option<&BinaryTreeNode<T>> {
+        self.right.as_deref()
+    }
+
+    pub fn is_leaf(&self) -> bool {
+        self.left.is_none() && self.right.is_none()
     }
 }
 
@@ -53,5 +85,29 @@ mod tests {
 
         // THEN
         assert_eq!(root.value, 100);
+    }
+
+    #[test]
+    fn it_should_return_true_if_node_is_leaf() {
+        // GIVEN
+        let root = BinaryTreeNode::new_leaf(123);
+
+        // WHEN
+        let leaf = root.is_leaf();
+
+        // THEN
+        assert_eq!(leaf, true);
+    }
+
+    #[test]
+    fn it_should_return_false_if_node_is_leaf() {
+        // GIVEN
+        let root = BinaryTreeNode::new_lefty(123, BinaryTreeNode::new_leaf(42));
+
+        // WHEN
+        let leaf = root.is_leaf();
+
+        // THEN
+        assert_eq!(leaf, false);
     }
 }
